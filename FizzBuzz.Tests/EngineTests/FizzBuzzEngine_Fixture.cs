@@ -1,6 +1,6 @@
 ﻿using FizzBuzz.Engine;
 
-namespace FizzBuzz.Tests
+namespace FizzBuzz.Tests.EngineTests
 {
     public class FizzBuzzEngine_Fixture
     {

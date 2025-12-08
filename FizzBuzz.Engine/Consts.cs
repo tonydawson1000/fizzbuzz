@@ -7,6 +7,7 @@
         public static string FizzBuzz => "FizzBuzz";
 
 
-        public static string ErrorStartGreaterThanEnd => "End value must be greater than or equal to start value.";
+        public static string ErrorStartGreaterThanEnd => "End value must be greater than Start value.";
+        public static string ErrorEndGreaterThanStart => "Start value must be greater than End value.";
     }
 }

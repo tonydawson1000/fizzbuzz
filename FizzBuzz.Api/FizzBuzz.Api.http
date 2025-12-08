@@ -1,0 +1,13 @@
+@FizzBuzz.Api_HostAddress = https://localhost:7062/api
+
+### - ForRange
+GET {{FizzBuzz.Api_HostAddress}}/FizzBuzz/ForRange?Start=1&End=10
+Accept: application/json
+
+### - ForSingle
+GET {{FizzBuzz.Api_HostAddress}}/FizzBuzz/35
+Accept: application/json
+
+### - ForRangeReverse
+GET {{FizzBuzz.Api_HostAddress}}/FizzBuzz/ForRangeReverse?Start=30&End=10
+Accept: application/json
