@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fizzbuzz-api-deploy
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      project: fizzbuzz-api
+  minReadySeconds: 20     # <<---- Wait 20 seconds after Pod is ready
+  strategy:
+    type: RollingUpdate   # <<---- Update (Replaces) some Pods without downtime
+    rollingUpdate:
+      maxUnavailable: 0  # <<---- At most 0 Pod unavailable during update
+      maxSurge: 1        # <<---- At most 1 extra Pod during update
+  template:
+    metadata:
+      labels:
+        project: fizzbuzz-api # <<---- Give all Pods this label
+    spec: 
+      containers:
+      - name: fizzbuzz-api-pod
+        imagePullPolicy: Always # <<---- Never use local images
+        image: quay.io/lab/fizzbuzz-api  # <<---- Container image
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fizzbuzz-api-service
+  labels:
+    project: fizzbuzz-api-service
+spec:
+  selector:
+    project: fizzbuzz-api
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: fizzbuzz-api-route
+  labels:
+    project: fizzbuzz-api
+spec:
+  port:
+    targetPort: 8080
+  to:
+    kind: Service
+    name: fizzbuzz-api-service
+status: {}
