@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -27,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FizzBuzz.Api\FizzBuzz.Api.csproj" />
     <ProjectReference Include="..\FizzBuzz.Engine\FizzBuzz.Engine.csproj" />
+    <ProjectReference Include="..\FizzBuzz.Parallel.Engine\FizzBuzz.Parallel.Engine.csproj" />
     <ProjectReference Include="..\FizzBuzz.Rule.Engine\FizzBuzz.Rule.Engine.csproj" />
   </ItemGroup>
 
