@@ -2,6 +2,7 @@
 using FizzBuzz.Engine;
 using FizzBuzz.Engine.Responses;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace FizzBuzz.Api.Controllers
 {
@@ -13,12 +14,18 @@ namespace FizzBuzz.Api.Controllers
         private readonly ILogger<FizzBuzzController> _logger;
         private readonly IFizzBuzzEngine _fizzBuzzEngine;
 
+        private readonly IMemoryCache _cache;
+
+        private readonly int _cacheDurationSeconds = 10;    //TODO : Move to config
+
         public FizzBuzzController(
             ILogger<FizzBuzzController> logger,
-            IFizzBuzzEngine fizzBuzzEngine)
+            IFizzBuzzEngine fizzBuzzEngine,
+            IMemoryCache cache)
         {
             _logger = logger;
             _fizzBuzzEngine = fizzBuzzEngine;
+            _cache = cache;
         }
 
         /// <summary>
@@ -35,12 +42,24 @@ namespace FizzBuzz.Api.Controllers
                 return BadRequest(ModelState);
             }
 
+            string cacheKey = $"fizzbuzz_range_{request.Start}_{request.End}";
+
+            if (_cache.TryGetValue(cacheKey, out FizzBuzzResponse cachedResponse))
+            {
+                cachedResponse.Message = "From Cache...";
+
+                return Ok(cachedResponse);
+            }
+
             var results = await _fizzBuzzEngine.GenerateFizzBuzzForRange(request.Start, request.End, cancellationToken);
 
             if(results.Success == false)
             {
                 return BadRequest(results.Message);
             }
+
+            // Store in cache with 10-second TTL
+            _cache.Set(cacheKey, results, TimeSpan.FromSeconds(_cacheDurationSeconds));
 
             return Ok(results);
         }
@@ -54,8 +73,25 @@ namespace FizzBuzz.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<FizzBuzzResponse>> FizzBuzzForSingle(int value, CancellationToken cancellationToken)
         {
+            string cacheKey = $"fizzbuzz_single_{value}";
+
+            if (_cache.TryGetValue(cacheKey, out string cachedResult))
+            {
+                var fizzBuzzCachedResponse = new FizzBuzzResponse
+                {
+                    Success = true,
+                    Message = "From Cache...",
+                    FizzBuzzResults = new List<string> { cachedResult }
+                };
+
+                return Ok(fizzBuzzCachedResponse);
+            }
+
             var result = await _fizzBuzzEngine.GenerateFizzBuzzForSingle(value, cancellationToken);
-            
+
+            // Store in cache with 10-second TTL
+            _cache.Set(cacheKey, result.FizzBuzzResults[0], TimeSpan.FromSeconds(_cacheDurationSeconds));
+
             return Ok(result);
         }
 
